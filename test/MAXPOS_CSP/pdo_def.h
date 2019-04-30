@@ -23,28 +23,24 @@ typedef union _mapping_obj{
 //0x1600 RxPDO
 typedef struct PACKED
 {
-	UINT16	ControlWord;		//0x6040
-	INT32	TargetPosition;		//0x607A
-	INT32	PositionOffset;		//0x60B0
-	INT32	VelocityOffset;		//0x60B1
-	INT16	TorqueOffset;		//0x60B2
-	UINT8	ModeOfOperation;	//0x6060
-	UINT32	PhysicalOutput;		//0x60FE
-	UINT16	TouchProbeFunction;	//0x60B8
+	unsigned short control_word; //关节控制字
+	int			   target_position; //位置环-目标位置
+	int			   target_velocity; //速度环-目标速度
+	short		   target_torque;	//力矩环-目标力矩
+	char		   mod;				//模式- 8:位置环控制，9:速度环控制，10:力矩环控制
+	char		   unused;
 }MAXPOS_DRIVE_RxPDO_t;
 
 //0x1A00 TxPDO
 typedef struct PACKED
 {
-	UINT16	StatusWord;					//0x6041
-	INT32	PositionActualValue;		//0x6064
-	INT32	VelocityActualValue;		//0x606C
-	INT16	TorqueActualValue;			//0x6077
-	UINT8	ModeOfOperationDisplay;		//0x6061
-	UINT32	DigitalInput;				//0x60FD
-	UINT16	TouchProbeStatus;			//0x60B9
-	INT32	TouchProbePosition1;		//0x60BA
-	INT32	TouchProbePosition2;		//0x60BB
+	unsigned short status_word;
+	int			   actual_position; //光编位置
+	int			   actual_velocity;
+	int			   actual_external_position; //磁编位置
+	short		   actual_torque;
+	char		   display_mod;
+	char		   unused;
 }MAXPOS_DRIVE_TxPDO_t;
 
 

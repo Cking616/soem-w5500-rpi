@@ -38,7 +38,7 @@
 #define NSEC_PER_SEC 			1000000000
 #define EC_TIMEOUTMON 500
 
-#define NUMOFMAXPOS_DRIVE	2
+#define NUMOFMAXPOS_DRIVE	1
 
 #define x_USE_DC
 
@@ -62,7 +62,7 @@ RT_TASK eccheck_task;
 RTIME now, previous;
 long ethercat_time_send, ethercat_time_read=0;
 long ethercat_time=0, worst_time=0;
-char ecat_ifname[32]="PiCAT";
+char ecat_ifname[32]="wiz";
 int run=1;
 int sys_ready=0;
 
@@ -182,7 +182,7 @@ boolean ecat_init(void)
 				{
 					maxpos_drive_pt[k].ptOutParam=(MAXPOS_DRIVE_RxPDO_t*)  		ec_slave[k+1].outputs;
 					maxpos_drive_pt[k].ptInParam= (MAXPOS_DRIVE_TxPDO_t*)  		ec_slave[k+1].inputs;
-					maxpos_drive_pt[k].ptOutParam->ModeOfOperation=OP_MODE_CYCLIC_SYNC_POSITION;
+					maxpos_drive_pt[k].ptOutParam->mod=OP_MODE_CYCLIC_SYNC_POSITION;
 				}
 				inOP = TRUE;
             }
@@ -313,8 +313,8 @@ void demo_run(void *arg)
 	   for (i=0; i<NUMOFMAXPOS_DRIVE; ++i)
 	   {
 		   controlword=0;
-		   started[i]=ServoOn_GetCtrlWrd(maxpos_drive_pt[i].ptInParam->StatusWord, &controlword);
-		   maxpos_drive_pt[i].ptOutParam->ControlWord=controlword;
+		   started[i]=ServoOn_GetCtrlWrd(maxpos_drive_pt[i].ptInParam->status_word, &controlword);
+		   maxpos_drive_pt[i].ptOutParam->control_word=controlword;
 		   if (started[i]) ServoState |= (1<<i);
 	   }
 
@@ -336,9 +336,9 @@ void demo_run(void *arg)
 			for (i=0; i<NUMOFMAXPOS_DRIVE; ++i)
 			{
 				if (i==0)
-					maxpos_drive_pt[i].ptOutParam->TargetPosition=ival + zeropos[i];
+					maxpos_drive_pt[i].ptOutParam->target_position=ival + zeropos[i];
 				else
-					maxpos_drive_pt[i].ptOutParam->TargetPosition=-ival + zeropos[i];
+					maxpos_drive_pt[i].ptOutParam->target_position=-ival + zeropos[i];
 			}
 			gt+=period;
 		}
@@ -346,8 +346,8 @@ void demo_run(void *arg)
 		{
 			for (i=0; i<NUMOFMAXPOS_DRIVE; ++i)
 			{
-				zeropos[i]=maxpos_drive_pt[i].ptInParam->PositionActualValue;
-				maxpos_drive_pt[i].ptOutParam->TargetPosition=zeropos[i];
+				zeropos[i]=maxpos_drive_pt[i].ptInParam->actual_position;
+				maxpos_drive_pt[i].ptOutParam->target_position=zeropos[i];
 			}
 		}
 		
@@ -365,7 +365,7 @@ void demo_run(void *arg)
 	//Servo OFF
 	for (i=0; i<NUMOFMAXPOS_DRIVE; ++i)
 	{
-		maxpos_drive_pt[i].ptOutParam->ControlWord=0; //Servo OFF (Disable voltage, transition#9)
+		maxpos_drive_pt[i].ptOutParam->control_word=0; //Servo OFF (Disable voltage, transition#9)
 	}
 	ec_send_processdata();
 	wkc = ec_receive_processdata(EC_TIMEOUTRET);
@@ -416,8 +416,8 @@ void print_run(void *arg)
 				for(i=0; i<NUMOFMAXPOS_DRIVE; ++i)
 				{
 					rt_printf("MAXPOS_Drive#%i\n", i+1);
-					rt_printf("Status word = 0x%X\n", maxpos_drive_pt[i].ptInParam->StatusWord);
-					rt_printf("Actual Position = %i / %i\n", maxpos_drive_pt[i].ptInParam->PositionActualValue, maxpos_drive_pt[i].ptOutParam->TargetPosition);
+					rt_printf("Status word = 0x%X\n", maxpos_drive_pt[i].ptInParam->status_word);
+					rt_printf("Actual Position = %i / %i\n", maxpos_drive_pt[i].ptInParam->actual_position, maxpos_drive_pt[i].ptOutParam->target_position);
 					rt_printf("\n");
 				}
 				rt_printf("\n");
