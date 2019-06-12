@@ -35,8 +35,8 @@ void double_to_fixed(double f_input, int32_t *pValue, int32_t *pBase)
 		(*pBase)=11;
 		(*pValue)=(int32_t) (2048.0*f_input);
 	}
-	else if (f_input<32.0)
-	{
+    else if (f_input<32.0)
+    {
 		(*pBase)=10;
 		(*pValue)=(int32_t) (1024.0*f_input);
 	}

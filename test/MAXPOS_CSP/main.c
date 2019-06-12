@@ -10,8 +10,7 @@
  *
  * Port for Raspberry pi by Ho Tam - thanhtam.h[at]gmail.com
  */
-
- #include <stdlib.h>
+#include <stdlib.h>
 #include <signal.h>
 
 #include <sys/mman.h>
@@ -38,9 +37,11 @@
 #define NSEC_PER_SEC 			1000000000
 #define EC_TIMEOUTMON 500
 
-#define NUMOFMAXPOS_DRIVE	1
 
-#define x_USE_DC
+#define NUMOFMAXPOS_DRIVE	6
+
+
+#define _USE_DC
 
 MAXPOS_Drive_pt	maxpos_drive_pt[NUMOFMAXPOS_DRIVE];
 
@@ -71,7 +72,7 @@ uint8 servo_ready=0, servo_prestate=0;
 int32_t zeropos[NUMOFMAXPOS_DRIVE]={0};
 double gt=0;
 
-double sine_amp=11500, f=0.2, period;
+double sine_amp=15200, f=0.2, period;
 int recv_fail_cnt=0;
 
 //variables for pdo re-mapping (sdo write)
@@ -88,9 +89,7 @@ boolean ecat_init(void)
 
     rt_printf("Starting simple test\n");
 	
-	//wiznet_hw_config(8, 1, 1000000); //select SPI-W5500 parameters, before ec_init
-	wiznet_hw_config(8, 0, 0); //31.25 Mhz, don't reset link 
-	
+	wiznet_hw_config(16, 1, 1000000); //select SPI-W5500 parameters, before ec_init
     if (ec_init(ecat_ifname))
     {
       rt_printf("ec_init on %s succeeded.\n", ecat_ifname); //ifname
@@ -320,7 +319,7 @@ void demo_run(void *arg)
 
 	   if (ServoState == (1<<NUMOFMAXPOS_DRIVE)-1) //all servos are in ON state
 	   {
-		   if (servo_ready==0) 
+		   if (servo_ready==0)
 			servo_ready=1;
 	   }
 		if (servo_ready) ready_cnt++;
@@ -350,7 +349,6 @@ void demo_run(void *arg)
 				maxpos_drive_pt[i].ptOutParam->target_position=zeropos[i];
 			}
 		}
-		
 		
 	   if (sys_ready)
 		if (worst_time<ethercat_time) worst_time=ethercat_time;
@@ -421,9 +419,17 @@ void print_run(void *arg)
 					rt_printf("\n");
 				}
 				rt_printf("\n");
-
-			}
-
+                FILE *pf = fopen("t_ecat.txt","a");
+                if (pf==NULL)
+                {
+                    printf("open t_ecat.txt error\n");
+                    fclose(pf);
+                    exit(0);
+                }
+                fprintf(pf,"sixjoint_ecat=%ld\n",ethercat_time/1000);
+                fclose(pf);
+                pf=NULL;
+            }
 		}
 	}
 }
